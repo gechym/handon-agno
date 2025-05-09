@@ -1,0 +1,98 @@
+[project]
+name = "adk-google"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+dependencies = [
+    "agno==1.4.5",
+    "fastapi>=0.115.12",
+    "google-genai>=1.13.0",
+    "litellm>=1.67.5",
+    "openai>=1.77.0",
+    "pymongo>=4.12.1",
+    "python-dotenv>=1.1.0",
+    "sqlalchemy>=2.0.40",
+    "uvicorn>=0.34.2",
+]
+
+[dependency-groups]
+dev = [
+    "pylint>=3.3.6",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
+    "ruff>=0.11.6",
+    "pycowsay>=0.0.0.2",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 150
+output-format = "concise"
+show-fixes = true
+unsafe-fixes = false
+preview = true
+exclude = [".venv"]
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle
+    "F", # pyflakes
+    "B", # flake8-bugbear
+    "UP", # pyupgrade,
+    "I", # isort,
+    "Q", # quote
+    "W", # warning
+]
+
+unfixable = ["B"]
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+
+
+[tool.pylint]
+disable = [
+    "too-many-instance-attributes",
+    "import-error",
+    "too-few-public-methods",
+    "too-many-return-statements",
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "missing-class-docstring",
+    "too-many-locals",
+    "too-many-arguments",
+    "too-many-positional-arguments",
+    "import-outside-toplevel",
+    "cyclic-import",
+    "too-many-arguments",
+    "redefined-builtin",
+    "broad-exception-caught",
+    "broad-exception-raised",
+    "super-init-not-called",
+    "duplicate-code",
+    "fixme",
+    "logging-fstring-interpolation"
+]
+reports = false
+max-branches=20
+output-format = "colorized"
+max-line-length = 150
+class-const-naming-style = "PascalCase"
+ignore-patterns = ["tests/", "migrations/", ".venv" , ".mypy_cache/", ".ruff_cache/"]
+
+[tool.pylint.DESIGN]
+max-statements = 70  # Số lượng statement tối đa trong 1 hàm trước khi cảnh báo
+
+
+[tool.mypy]
+no_implicit_optional = false
+disallow_untyped_decorators = false
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_return_any = true
+warn_no_return = false
+warn_unreachable = true
+strict = true
+disallow_subclassing_any = false
+strict_optional = true

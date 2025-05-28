@@ -2,7 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+/tmp
 # C extensions
 *.so
 
@@ -112,6 +112,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+**/tmp/
 
 # Spyder project settings
 .spyderproject
@@ -138,3 +139,4 @@ dmypy.json
 cython_debug/
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Python
+.demo_team/tmp/

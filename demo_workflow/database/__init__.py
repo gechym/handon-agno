@@ -1,6 +1,7 @@
-from ._mongodb_storage import mongo_db, mongo_db_workflow
+from ._db import setup, get_agent_storage_db, get_workflow_storage_db
 
 __all__ = [
-    "mongo_db",
-    "mongo_db_workflow"
+    "setup",
+    "get_agent_storage_db",
+    "get_workflow_storage_db"
 ]

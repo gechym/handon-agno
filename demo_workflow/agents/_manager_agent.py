@@ -1,24 +1,30 @@
 from agno.agent import Agent
+from agno.models.litellm import LiteLLM
 from agno.models.openai import OpenAIChat
 
-from agents.tools import handoff_to_agent
-from database import mongo_db
-
+from demo_workflow.tools import handoff_to_agent
+from demo_workflow.database import get_agent_storage_db
+import openai
 
 def create_manager_agent(
-    session_id: str = None,
-    user_id: str = None,
+    model_name: str, 
+    client: openai.Client | None = None, 
 ) -> Agent:
+    
+    model = OpenAIChat(id=model_name, temperature=0.1) if not client else LiteLLM(
+        id=model_name,
+        client=client,
+        temperature=0.1,
+    )
+
     manager_agent = Agent(
-        session_id=session_id,
-        user_id=user_id,
         name="manager_agent",
         agent_id="manager_agent",
-        model=OpenAIChat(id="gpt-4o", temperature=0.1),
+        model=model,
         # setup database
-        storage=mongo_db,
+        storage=get_agent_storage_db(),
         add_history_to_messages=True,
-        num_history_runs=5,
+        num_history_runs=30,
         # setup state
         session_state={"current_agent": ""},
         add_state_in_messages=True,
@@ -32,13 +38,13 @@ def create_manager_agent(
 
 
 def __create_prompt_for_agent(agent: Agent) -> Agent:
-    agent.description = "## Persona ##\nBạn là nhân viên chăm sóc khách hàng (CSKH) của Nhà phát hành (NPH) VPLAY. \nTên của bạn là **Vivi**.\n"
-    agent.instructions = [
-        "   - Sử dụng quy tắc **Handoff Rules** bên dưới để xác định **agent chuyên môn** phù hợp "
-        "và chuyển tiếp yêu cầu khách hàng đến **agent chuyển môn** đó để xử lý vấn đề.",
-        "   - Yêu cầu khách hàng cung cấp thêm thông tin để làm rõ vấn đề.",
-        "   Lưu ý: Bạn có thể đưa ra các câu hỏi cụ thể để hướng dẫn khách hàng cung cấp thông tin cần thiết.",
-        "#### **Handoff Rules:** : sử dụng handoff_to_agent để tiến hành handoff",
-        "1. Chỉ khi tài khoản bị phong cấm, khóa tài khoản hãy chuyển tiếp đến `master_banned_account_support_agent`.",
-    ]
+    agent.description = "Bạn là quản lý của ứng dụng Agno, bạn có nhiệm vụ xử lý các yêu cầu từ khách hàng và chuyển giao đến các bộ phận chuyên môn phù hợp.\n"
+    agent.instructions = (
+        "Nhiệm vụ của bạn là xử lý yêu cầu từ khách hàng, với **ưu tiên hàng đầu là xác định chính xác vấn đề của khách hàng để thực hiện chuyển giao đến đúng bộ phận chuyên môn.**\n\n"
+        "**Quy trình chuyển giao chung:**\n"
+        "Bạn hãy sử dụng tool **handoff_to_agent** để chuyển giao yêu cầu đến các Agent chuyên môn phù hợp với agent_name.\n"
+        "1.  `master_banned_account_support_agent`: Chỉ khi tài khoản bị phong cấm, khóa tài khoản.\n"
+    )
+    agent.goal = "Tiếp nhận khách hàng và chuyển tiếp đến agent chuyên môn phù hợp."
+    agent.success_criteria = "Hoàn thành việc chuyển giao yêu cầu đến Agent chuyên môn"
     return agent

@@ -1,0 +1,10 @@
+agent_settings:
+  api_key: ${oc.env:LITELLM_API_KEY, ""}
+  base_url: ${oc.env:LITELLM_BASE_URL, ""}
+  model_name: "gpt-4o"
+
+db_settings:
+  db_url: "mongodb://localhost:27017/"
+  db_name: "agno-demo"
+  agent_collection: "agent"
+  workflow_collection: "workflow"

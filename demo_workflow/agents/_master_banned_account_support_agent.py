@@ -1,18 +1,17 @@
-import os
 import openai
-
 from agno.agent import Agent
 from agno.models.litellm import LiteLLM
 from agno.models.openai import OpenAIChat
 
-from demo_workflow.tools import handoff_to_agent, send_card_ticket
 from demo_workflow.database import get_agent_storage_db
+from demo_workflow.tools import handoff_to_agent, send_card_ticket
+
 
 def create_master_banned_account_support_agent(
-    model_name: str, 
-    client: openai.Client = None, 
+    model_name: str,
+    client: openai.Client = None,
 ) -> Agent:
-    
+
     model = OpenAIChat(id=model_name, temperature=0.1) if not client else LiteLLM(
         id=model_name,
         client=client,

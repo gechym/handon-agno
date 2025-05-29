@@ -13,8 +13,9 @@ def log_post_tool(fc: FunctionCall):
     print(f"Arguments: {fc.arguments}")
     print(f"Result: {fc.result}")
 
+
 @tool(
-    name="handoff_to_agent", 
+    name="handoff_to_agent",
     description="Sử dụng để chuyên giao đến các agent chuyên môn phù hợp",
     instructions=(
         "### Sử dụng tool handoff_to_agent khi ###\n"
@@ -32,7 +33,7 @@ def handoff_to_agent(agent: Agent, agent_name: str) -> str:
     Returns:
         str: Thông báo chuyển giao thành công
     """
-    agent.session_state['current_agent'] = agent_name
+    agent.session_state["current_agent"] = agent_name
     return f"Chuyên giao đến agent {agent_name} thành công."
 
 

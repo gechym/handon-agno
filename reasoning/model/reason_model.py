@@ -1,15 +1,14 @@
 import os
-import openai
+from pathlib import Path
 
+import openai
 from agno.agent import Agent
 from agno.models.google import Gemini
 from agno.models.litellm import LiteLLM
 from dotenv import load_dotenv
 
-from pathlib import Path
-
 load_dotenv()
-dotenv_path = Path('/home/tran-tien/Documents/PyCharmProject/Work/FTech/Agno/research/.env')
+dotenv_path = Path("/home/tran-tien/Documents/PyCharmProject/Work/FTech/Agno/research/.env")
 load_dotenv(dotenv_path=dotenv_path)
 
 os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")

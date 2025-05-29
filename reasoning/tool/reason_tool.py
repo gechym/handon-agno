@@ -1,8 +1,6 @@
 from agno.agent import Agent
 from agno.models.anthropic import Claude
 from agno.tools.thinking import ThinkingTools
-from agno.tools.reasoning import ReasoningTools
-from agno.tools.knowledge import KnowledgeTools
 from agno.tools.yfinance import YFinanceTools
 
 reasoning_agent = Agent(

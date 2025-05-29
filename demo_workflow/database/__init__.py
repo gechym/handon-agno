@@ -1,4 +1,4 @@
-from ._db import setup, get_agent_storage_db, get_workflow_storage_db
+from ._db import get_agent_storage_db, get_workflow_storage_db, setup
 
 __all__ = [
     "setup",

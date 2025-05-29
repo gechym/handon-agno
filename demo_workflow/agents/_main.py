@@ -1,7 +1,8 @@
 from agno.agent import Agent
+
 from ._manager_agent import create_manager_agent
 from ._master_banned_account_support_agent import create_master_banned_account_support_agent
-import openai
+
 
 class _Setting:
     manager_agent: Agent = None
@@ -11,7 +12,7 @@ class _Setting:
 
 #     if not all([base_url, api_key, model_name, user_id, session_id]):
 #         raise ValueError("Configuration parameters cannot be empty.")
-    
+
 #     client = openai.Client(
 #         base_url=base_url,
 #         api_key=api_key
@@ -24,7 +25,7 @@ def setup(base_url: str, api_key: str, model_name: str) -> None:
 
     if not all([base_url, api_key, model_name]):
         raise ValueError("Configuration parameters cannot be empty.")
-    
+
     client = None
     # client = openai.Client(
     #     base_url=base_url,
@@ -36,6 +37,7 @@ def setup(base_url: str, api_key: str, model_name: str) -> None:
 
 def get_manager_agent() -> Agent:
     return _Setting.manager_agent
+
 
 def get_master_banned_account_support_agent() -> Agent:
     return _Setting.master_banned_account_support_agent

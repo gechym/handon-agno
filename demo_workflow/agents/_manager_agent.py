@@ -1,16 +1,17 @@
+import openai
 from agno.agent import Agent
 from agno.models.litellm import LiteLLM
 from agno.models.openai import OpenAIChat
 
-from demo_workflow.tools import handoff_to_agent
 from demo_workflow.database import get_agent_storage_db
-import openai
+from demo_workflow.tools import handoff_to_agent
+
 
 def create_manager_agent(
-    model_name: str, 
-    client: openai.Client | None = None, 
+    model_name: str,
+    client: openai.Client | None = None,
 ) -> Agent:
-    
+
     model = OpenAIChat(id=model_name, temperature=0.1) if not client else LiteLLM(
         id=model_name,
         client=client,

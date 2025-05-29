@@ -2,14 +2,15 @@ import re
 from typing import Any
 
 from agno.agent import Agent
-from agno.team.team import Team
-from pydantic import BaseModel, Field
 from agno.models.openai import OpenAIChat
-
+from agno.team.team import Team
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field
+
 load_dotenv()
 
 model = OpenAIChat(id="gpt-4o")
+
 
 class CodeAndTestRequirements(BaseModel):
     """Định dạng kết quả cuối cùng cho code_requirement và test_requirement."""
@@ -17,7 +18,7 @@ class CodeAndTestRequirements(BaseModel):
         description="Mô tả chính xác những gì hàm hoặc đoạn mã cần làm.")
     test_requirement: str = Field(
         description="Mô tả các LOẠI trường hợp kiểm thử cần được tạo ra, không chứa các giá trị cụ thể.")
-    
+
 
 class TestCaseItem(BaseModel):
     """Mô tả cấu trúc của một test case đơn lẻ."""
@@ -143,7 +144,7 @@ code_generator = Agent(
         "Chỉ trả về đoạn mã Python đã hoàn chỉnh. Không bao gồm bất kỳ giải thích, ví dụ sử dụng hoặc văn bản bổ sung nào khác.",
         "Đảm bảo mã có thể chạy được và không có lỗi cú pháp.",
     ],
-    success_criteria= "Trả về một đoạn mã Python hoàn chỉnh, có thể chạy được và tuân thủ chính xác yêu cầu đã cho trong `code_requirement`.",
+    success_criteria="Trả về một đoạn mã Python hoàn chỉnh, có thể chạy được và tuân thủ chính xác yêu cầu đã cho trong `code_requirement`.",
 )
 
 test_generator = Agent(
@@ -207,5 +208,3 @@ print("Bắt đầu quy trình phát triển và kiểm thử...")
 team_leader.print_response("Viết một hàm Python có tên `is_palindrome` nhận một chuỗi và trả về True nếu nó là palindrome, ngược lại trả về False. Bỏ qua chữ hoa/thường và khoảng trắng.")
 
 print("Quy trình đã hoàn thành. Bạn có thể tiếp tục với yêu cầu khác hoặc dừng lại.")
-
-

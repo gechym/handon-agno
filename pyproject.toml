@@ -7,11 +7,15 @@ dependencies = [
     "agno==1.4.5",
     "fastapi>=0.115.12",
     "google-genai>=1.13.0",
+    "lancedb>=0.22.1",
     "litellm>=1.67.5",
     "openai>=1.77.0",
-    "pymongo>=4.12.1",
+    "pandas>=2.2.3",
+    "pylance>=0.28.0",
+    "pymongo[srv]>=4.12.1",
     "python-dotenv>=1.1.0",
     "sqlalchemy>=2.0.40",
+    "tantivy>=0.24.0",
     "uvicorn>=0.34.2",
 ]
 

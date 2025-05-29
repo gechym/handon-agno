@@ -1,21 +1,14 @@
-import os
-import openai
 import re
-
-from pathlib import Path
 from textwrap import dedent
-from pydantic import BaseModel, Field
-from typing import List, Literal, Optional, Any
-from enum import Enum  # Import Enum
+from typing import Any
 
 from agno.agent import Agent
-from agno.team.team import Team
-from agno.models.litellm import LiteLLM
-from agno.reasoning.step import ReasoningSteps, ReasoningStep, NextAction
-from agno.models.google import Gemini
 from agno.models.openai import OpenAIChat
-
+from agno.reasoning.step import ReasoningSteps
+from agno.team.team import Team
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field
+
 load_dotenv()
 
 model = OpenAIChat(id="gpt-4o")
@@ -34,10 +27,11 @@ class TestCaseItem(BaseModel):
     input: Any = Field(description="Giá trị đầu vào cho hàm. Có thể là một giá trị đơn hoặc một list/tuple nếu hàm nhận nhiều đối số.")
     expected_output: Any = Field(description="Giá trị đầu ra mong đợi từ hàm.")
 
+
 # ReasoningSteps, ReasoningStep, NextAction đã được giả định là import từ agno.reasoning.step
 
 # --- Tool run_python_code (Đã sửa lỗi type hint cho test_cases) ---
-def run_python_code(code: str, test_cases: List[TestCaseItem]) -> dict: # Đã sửa từ 'list' sang 'List[TestCaseItem]'
+def run_python_code(code: str, test_cases: list[TestCaseItem]) -> dict:  # Đã sửa từ 'list' sang 'List[TestCaseItem]'
     """
     Thực thi mã Python với các test cases đã cho và trả về kết quả.
     An toàn khi thực thi mã trong một môi trường sandbox.
@@ -59,7 +53,7 @@ def run_python_code(code: str, test_cases: List[TestCaseItem]) -> dict: # Đã s
                   ]
               }
     """
-    print(f"\n--- Executing Code ---")
+    print("\n--- Executing Code ---")
     print(f"Code:\n{code}\n")
     # Chuyển đổi TestCaseItem Pydantic objects thành dicts để tương thích với logic hiện tại
     # hoặc điều chỉnh logic để làm việc trực tiếp với TestCaseItem.
@@ -87,24 +81,24 @@ def run_python_code(code: str, test_cases: List[TestCaseItem]) -> dict: # Đã s
     else:
         return {"success": False, "results": [], "error": "No function definition found in the provided code."}
 
-    for i, test_case in enumerate(test_cases_dicts): # Sử dụng test_cases_dicts đã chuyển đổi
-        input_val = test_case.get('input')
-        expected_output = test_case.get('expected_output')
+    for i, test_case in enumerate(test_cases_dicts):  # Sử dụng test_cases_dicts đã chuyển đổi
+        input_val = test_case.get("input")
+        expected_output = test_case.get("expected_output")
         actual_output = None
         passed = False
         error = None
 
         try:
             if isinstance(input_val, (list, tuple)):
-                actual_output = target_function(*input_val) # Unpack if multiple arguments
+                actual_output = target_function(*input_val)  # Unpack if multiple arguments
             else:
-                actual_output = target_function(input_val) # Single argument
-            
+                actual_output = target_function(input_val)  # Single argument
+
             passed = (actual_output == expected_output)
         except Exception as e:
             error = str(e)
             passed = False
-        
+
         if not passed:
             overall_success = False
 
@@ -114,10 +108,11 @@ def run_python_code(code: str, test_cases: List[TestCaseItem]) -> dict: # Đã s
             "actual_output": actual_output,
             "error": error
         })
-        print(f"Test Case {i+1}: Input={input_val}, Expected={expected_output}, Actual={actual_output}, Passed={passed}")
+        print(f"Test Case {i + 1}: Input={input_val}, Expected={expected_output}, Actual={actual_output}, Passed={passed}")
 
     print(f"--- Code Execution Finished. Overall Success: {overall_success} ---\n")
     return {"success": overall_success, "results": results}
+
 
 # --- Định nghĩa Agent reason_request_analyzer (Đã tối ưu prompt) ---
 # Agent này CHỈ làm nhiệm vụ phân tích, suy nghĩ, đưa ra nhận định, hướng.
@@ -194,7 +189,7 @@ request_analyzer = Agent(
     name="RequestAnalyzer",
     model=model,
     role="Phân tích yêu cầu người dùng và tạo ra yêu cầu chi tiết cho việc lập trình và kiểm thử.",
-    instructions=dedent(f"""\
+    instructions=dedent("""\
         Với một yêu cầu tổng quát từ người dùng, nhiệm vụ của bạn là gọi `reasoning_agent` (`ReasonRequestAnalyzer`) để thực hiện phân tích chi tiết.
         
         Sau khi nhận được kết quả `ReasoningSteps` từ `reasoning_agent`, bạn phải:
@@ -208,10 +203,10 @@ request_analyzer = Agent(
         
         Ví dụ nếu yêu cầu là 'Viết hàm Python để tính tổng hai số', và bạn nhận được phân tích từ `reasoning_agent`, bạn sẽ tự tổng hợp và trả về JSON sau:
         ```json
-        {{
+        {
           "code_requirement": "Viết một hàm Python có tên `add_two_numbers` nhận hai số nguyên (int) làm đối số và trả về tổng của chúng dưới dạng số nguyên.",
           "test_requirement": "Tạo một tập hợp các test cases cho hàm `add_two_numbers`. Các loại test case cần bao gồm: test chức năng cơ bản (số dương), test với số âm, test với số 0, và test biên (số lớn/nhỏ). Định dạng của mỗi test case phải là một đối tượng chứa 'input' (tuple của hai số nguyên) và 'expected_output' (số nguyên)."
-        }}
+        }
         ```
         Bạn không cần phải tự thực hiện quá trình reasoning. Bạn chỉ tập trung vào việc đọc phân tích của `reasoning_agent` và tự tổng hợp/định dạng lại đầu ra cuối cùng dưới dạng `CodeAndTestRequirements`.
     """),
@@ -248,10 +243,10 @@ test_generator = Agent(
         "Trả về một danh sách (list) các test cases đã tạo. Không bao gồm bất kỳ giải thích hoặc văn bản bổ sung nào khác.",
         "Ví dụ nếu yêu cầu là 'Tạo test cases cho hàm `add_two_numbers` nhận hai số nguyên và trả về tổng':",
         "[",
-        "  {\"input\": [2, 3], \"expected_output\": 5},",
-        "  {\"input\": [-1, 1], \"expected_output\": 0},",
-        "  {\"input\": [0, 0], \"expected_output\": 0},",
-        "  {\"input\": [1000, 2000], \"expected_output\": 3000}",
+        '  {"input": [2, 3], "expected_output": 5},',
+        '  {"input": [-1, 1], "expected_output": 0},',
+        '  {"input": [0, 0], "expected_output": 0},',
+        '  {"input": [1000, 2000], "expected_output": 3000}',
         "]",
     ],
 )

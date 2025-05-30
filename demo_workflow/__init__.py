@@ -1,5 +1,7 @@
 from builtins import str
 from collections.abc import Iterator
+from typing import cast
+
 
 from agno.agent import RunResponse
 from agno.utils.pprint import pprint_run_response
@@ -7,16 +9,20 @@ from agno.workflow import Workflow
 
 from agentic_rag import agentic_rag
 from demo_workflow._setting import setup
-from demo_workflow.agents import get_manager_agent, get_master_banned_account_support_agent
+from demo_workflow.agents import coor_noreason_team_leader, get_manager_agent, get_master_banned_account_support_agent
+from demo_workflow.agents import coor_reason_team_leader as coor_reason_team_leader
 from demo_workflow.database import get_agent_storage_db as get_agent_storage_db
 from demo_workflow.database import get_workflow_storage_db
 
-setup("/home/tran-tien/Documents/PyCharmProject/Work/FTech/Agno/handon-agno/config/config.yaml")
+from rich.pretty import pprint
+
+setup("config/config.yaml")
 
 agents = {
     "master_banned_account_support_agent": get_master_banned_account_support_agent(),
     "manager_agent": get_manager_agent(),
-    "agentic_rag": agentic_rag
+    "agentic_rag": agentic_rag,
+    "team_leader": coor_noreason_team_leader,  # coor_reason_team_leader
 }
 
 
@@ -44,21 +50,23 @@ class SimpleWorkflow(Workflow):
             current_agent = agent_run.session_state.get("current_agent", pre_agent)
 
             if current_agent == pre_agent:
-                return result
+                return cast(RunResponse, result)
 
             pre_agent = current_agent
             self.session_state["current_agent"] = current_agent
+
 
 workflow = SimpleWorkflow(
     storage=get_workflow_storage_db()
 )
 
-# while True:
-#     message = input("Enter message: ")
-#     if message.lower() == "exit":
-#         break
-
-#     report = workflow.run(message=message)
-
-#     # Print the report
-#     pprint_run_response(report, markdown=True, show_time=True)
+if __name__ == "__main__":
+    while True:
+        message = input("Enter message: ")
+        if message.lower() == "exit":
+            break
+        report = workflow.run(message=message)
+        try:
+            pprint_run_response(report, markdown=True, show_time=True)
+        except Exception as e:
+            pass

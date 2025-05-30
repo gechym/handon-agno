@@ -9,6 +9,8 @@ from agno.team.team import Team
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
+from agentic_rag.tools.handoff_to_agent import handoff_to_agent
+
 load_dotenv()
 
 model = OpenAIChat(id="gpt-4o")
@@ -32,27 +34,6 @@ class TestCaseItem(BaseModel):
 
 # --- Tool run_python_code (Đã sửa lỗi type hint cho test_cases) ---
 def run_python_code(code: str, test_cases: list[TestCaseItem]) -> dict:  # Đã sửa từ 'list' sang 'List[TestCaseItem]'
-    """
-    Thực thi mã Python với các test cases đã cho và trả về kết quả.
-    An toàn khi thực thi mã trong một môi trường sandbox.
-    
-    Args:
-        code (str): Chuỗi mã Python cần thực thi.
-        test_cases (List[TestCaseItem]): Danh sách các đối tượng TestCaseItem, mỗi đối tượng chứa 'input' và 'expected_output'.
-                               Ví dụ: [{'input': [2, 3], 'expected_output': 5}]
-                               Đối với input, nếu hàm nhận nhiều đối số, hãy đặt chúng trong một tuple hoặc list.
-                               Ví dụ: input: (2, 3) cho hàm func(a, b).
-
-    Returns:
-        dict: Kết quả kiểm thử. Ví dụ:
-              {
-                  "success": bool,
-                  "results": [
-                      {"test_case": dict, "passed": bool, "actual_output": any, "error": str},
-                      ...
-                  ]
-              }
-    """
     print("\n--- Executing Code ---")
     print(f"Code:\n{code}\n")
     # Chuyển đổi TestCaseItem Pydantic objects thành dicts để tương thích với logic hiện tại
@@ -180,7 +161,6 @@ reason_request_analyzer = Agent(
         - Tuân thủ nghiêm ngặt tối thiểu {min_reasoning_steps} và tối đa {max_reasoning_steps} bước để đảm bảo giải quyết nhiệm vụ hiệu quả.
         - Chỉ tạo một thể hiện (instance) duy nhất của `ReasoningSteps` cho phản hồi của bạn, chứa TẤT CẢ các bước từ đầu đến cuối.
     """),
-    debug_mode=True,
 )
 
 # --- Định nghĩa Agent request_analyzer (Đã sửa đổi Prompt) ---
@@ -214,7 +194,6 @@ request_analyzer = Agent(
     reasoning_agent=reason_request_analyzer,  # Gán agent reasoning vào đây!
     # response_model của request_analyzer là CodeAndTestRequirements
     response_model=CodeAndTestRequirements,
-    debug_mode=True,
 )
 
 # --- Định nghĩa Agent code_generator (Giữ nguyên) ---
@@ -253,7 +232,7 @@ test_generator = Agent(
 
 # --- Định nghĩa TeamLeader (Đã bỏ comment các bước kiểm thử) ---
 team_leader = Team(
-    name="TeamLeader",
+    name="TeamLeader_reason",
     mode="coordinate",
     model=model,
     members=[request_analyzer, code_generator, test_generator],
@@ -276,24 +255,14 @@ team_leader = Team(
         "  - Lặp lại Bước 3 và 4 cho đến khi mã vượt qua tất cả các test hoặc đến khi bạn nhận thấy không thể sửa lỗi thêm.",
         "**Bước 5: Hoàn thành.**",
         "  - Khi tất cả test cases đã vượt qua, in ra mã Python cuối cùng và xác nhận rằng nó hoạt động chính xác.",
+        "#### **Handoff Rules:** : sử dụng handoff_to_agent để tiến hành handoff",
+        "Tất cả yêu cầu không thuộc vấn đề phát triển phần mềm, viết code python hãy chuyển tiếp đến `manager_agent`",
     ],
-    tools=[run_python_code],
+    tools=[run_python_code, handoff_to_agent],
     add_datetime_to_instructions=True,
     enable_agentic_context=True,
-    markdown=True,
     debug_mode=True,
+    markdown=True,
     show_members_responses=True,
     get_member_information_tool=True
 )
-
-
-# --- Thực thi quy trình ---
-# while True:
-print("Bắt đầu quy trình phát triển và kiểm thử...")
-team_leader.print_response("Viết một hàm Python có tên `is_palindrome` nhận một chuỗi và trả về True nếu nó là palindrome, ngược lại trả về False. Bỏ qua chữ hoa/thường và khoảng trắng.")
-
-print("Quy trình đã hoàn thành. Bạn có thể tiếp tục với yêu cầu khác hoặc dừng lại.")
-# cont = input("Bạn có muốn tiếp tục với yêu cầu khác không? (y/n): ")
-    # if cont.lower() != 'y':
-    #     print("Kết thúc quy trình.")
-    #     breakc

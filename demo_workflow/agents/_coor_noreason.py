@@ -7,6 +7,8 @@ from agno.team.team import Team
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
+from agentic_rag.tools.handoff_to_agent import handoff_to_agent
+
 load_dotenv()
 
 model = OpenAIChat(id="gpt-4o")
@@ -28,27 +30,6 @@ class TestCaseItem(BaseModel):
 
 
 def run_python_code(code: str, test_cases: list[TestCaseItem]) -> dict:
-    """
-    Thực thi mã Python với các test cases đã cho và trả về kết quả.
-    An toàn khi thực thi mã trong một môi trường sandbox.
-    
-    Args:
-        code (str): Chuỗi mã Python cần thực thi.
-        test_cases (List[TestCaseItem]): Danh sách các đối tượng TestCaseItem, mỗi đối tượng chứa 'input' và 'expected_output'.
-                            Ví dụ: [{'input': [2, 3], 'expected_output': 5}]
-                            Đối với input, nếu hàm nhận nhiều đối số, hãy đặt chúng trong một tuple hoặc list.
-                            Ví dụ: input: (2, 3) cho hàm func(a, b).
-
-    Returns:
-        dict: Kết quả kiểm thử. Ví dụ:
-            {
-                "success": bool,
-                "results": [
-                    {"test_case": dict, "passed": bool, "actual_output": any, "error": str},
-                    ...
-                ]
-            }
-    """
     print("\n--- Executing Code ---")
     print(f"Code:\n{code}\n")
     # Chuyển đổi TestCaseItem Pydantic objects thành dicts để tương thích với logic hiện tại
@@ -144,7 +125,6 @@ code_generator = Agent(
         "Chỉ trả về đoạn mã Python đã hoàn chỉnh. Không bao gồm bất kỳ giải thích, ví dụ sử dụng hoặc văn bản bổ sung nào khác.",
         "Đảm bảo mã có thể chạy được và không có lỗi cú pháp.",
     ],
-    success_criteria="Trả về một đoạn mã Python hoàn chỉnh, có thể chạy được và tuân thủ chính xác yêu cầu đã cho trong `code_requirement`.",
 )
 
 test_generator = Agent(
@@ -165,13 +145,12 @@ test_generator = Agent(
         '  {"input": [1000, 2000], "expected_output": 3000}',
         "]",
     ],
-    success_criteria="Trả về một danh sách các test cases hợp lệ, mỗi test case là một dictionary với các khóa 'input' và 'expected_output'.",
 )
 
 # --- Định nghĩa TeamLeader ---
 
 team_leader = Team(
-    name="TeamLeader",
+    name="TeamLeader_noreason",
     mode="coordinate",  # Cho phép team tự điều phối các agent thành viên
     model=model,
     members=[request_analyzer, code_generator, test_generator],
@@ -194,17 +173,14 @@ team_leader = Team(
         "  - Lặp lại Bước 3 và 4 cho đến khi mã vượt qua tất cả các test hoặc đến khi bạn nhận thấy không thể sửa lỗi thêm.",
         "**Bước 5: Hoàn thành.**",
         "  - Khi tất cả test cases đã vượt qua, bạn hãy cung cấp đoạn mã cuối cùng đã kiểm thử thành công cho người dùng.",
+        "#### **Handoff Rules:** : sử dụng handoff_to_agent để tiến hành handoff",
+        "Tất cả yêu cầu không thuộc vấn đề phát triển phần mềm, viết code python hãy chuyển tiếp đến `manager_agent`",
     ],
     # Thay đổi ở đây: truyền trực tiếp hàm `run_python_code`
-    tools=[run_python_code],
+    tools=[run_python_code, handoff_to_agent],
     enable_agentic_context=True,
-    markdown=True,
     debug_mode=True,
+    markdown=True,
     show_members_responses=True,
-    get_member_information_tool=True
+    get_member_information_tool=True,
 )
-
-print("Bắt đầu quy trình phát triển và kiểm thử...")
-team_leader.print_response("Viết một hàm Python có tên `is_palindrome` nhận một chuỗi và trả về True nếu nó là palindrome, ngược lại trả về False. Bỏ qua chữ hoa/thường và khoảng trắng.")
-
-print("Quy trình đã hoàn thành. Bạn có thể tiếp tục với yêu cầu khác hoặc dừng lại.")

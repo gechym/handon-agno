@@ -33,7 +33,6 @@ def handoff_to_agent(agent: Agent, agent_name: str) -> str:
     Returns:
         str: Thông báo chuyển giao thành công
     """
-    agent.session_state["current_agent"] = agent_name
     return f"Chuyên giao đến agent {agent_name} thành công."
 
 

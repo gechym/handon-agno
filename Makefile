@@ -1,3 +1,11 @@
+.PHONY: run_playground
+run_playground:
+	export PYTHONPATH=./ && uv run playground.py
+
+.PHONY: run_workflow
+run_workflow:
+	export PYTHONPATH=./ && uvx run demo_workflow/__init__.py
+
 .PHONY: lint
 lint:
 	@echo "🚀 Linting with ruff"

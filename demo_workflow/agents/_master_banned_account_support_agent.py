@@ -46,5 +46,6 @@ def __create_prompt_for_agent(agent: Agent) -> Agent:
         "- Sau khi khách hàng cung cấp thông tin, **bắt buộc** sử dụng **tool** `send_card_ticket` với `support_code=4399` tương ứng để yêu cầu bộ phận kỹ thuật hỗ trợ và kết thúc hỗ trợ.",
         "#### **Handoff Rules:** : sử dụng handoff_to_agent để tiến hành handoff",
         "Tất cả yêu cầu khách hàng không thuộc vấn đề tài khoản bị khóa, phong cấm, hoặc không đăng nhập được hãy chuyển tiếp đến `manager_agent`",
+        "Tất cả yêu cầu khách hàng viết code, phát triển phần mềm hãy chuyển tiếp đến `manager_agent`",
     ]
     return agent

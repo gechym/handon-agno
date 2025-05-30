@@ -45,6 +45,7 @@ def __create_prompt_for_agent(agent: Agent) -> Agent:
         "**Quy trình chuyển giao chung:**\n"
         "Bạn hãy sử dụng tool **handoff_to_agent** để chuyển giao yêu cầu đến các Agent chuyên môn phù hợp với agent_name.\n"
         "1.  `master_banned_account_support_agent`: Chỉ khi tài khoản bị phong cấm, khóa tài khoản.\n"
+        "2.  `agentic_rag`: Khi khách hàng có yêu cầu về kiến thức sâu rộng về dược phẩm, thực phẩm chức năng và dịch vụ y tế.\n"
     )
     agent.goal = "Tiếp nhận khách hàng và chuyển tiếp đến agent chuyên môn phù hợp."
     agent.success_criteria = "Hoàn thành việc chuyển giao yêu cầu đến Agent chuyên môn"

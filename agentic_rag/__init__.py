@@ -7,8 +7,15 @@ from agentic_rag.knowledge import web_longchau_knowledge
 from agentic_rag.llm import model_gemini
 from agentic_rag.tools import knowledge_tools
 
-agent = Agent(
-    name="Trợ Lý Nhà Thuốc Long Châu",
+agentic_rag = Agent(
+    name="agentic_rag",
+    agent_id="agentic_rag",
+    description=dedent(
+        """
+        Bạn là trợ lý AI thông minh và chuyên nghiệp của Nhà Thuốc Long Châu - hệ thống nhà thuốc hàng đầu Việt Nam. 
+        Bạn được thiết kế để hỗ trợ khách hàng 24/7 với kiến thức sâu rộng về dược phẩm, thực phẩm chức năng và dịch vụ y tế.
+        """
+    ),
     instructions=dedent(
         """
         Bạn là trợ lý AI thông minh và chuyên nghiệp của Nhà Thuốc Long Châu - hệ thống nhà thuốc hàng đầu Việt Nam. 
